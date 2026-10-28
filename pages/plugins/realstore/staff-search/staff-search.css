@@ -1,0 +1,70 @@
+/**
+* 位置和搜索
+*/
+.nav-location {
+    max-width: 260rpx;
+    height: 56rpx;
+    line-height: 56rpx;
+    flex-shrink: 0;
+}
+.nav-search {
+    flex: 1;
+    min-width: 0;
+    width: auto;
+}
+.nav-search.map {
+    flex: 1;
+    width: auto;
+}
+.nav-map-switch {
+    flex-shrink: 0;
+}
+
+/**
+* 数据列表（仅顶栏，无分类）
+*/
+.scroll-box,
+.scroll-box.scroll-box-ece-nav {
+    height: calc(100vh - 100rpx);
+}
+.scroll-box.map,
+.scroll-box.scroll-box-ece-nav.map {
+    height: calc(100vh - 648rpx);
+}
+/* 收起：仅保留约一行卡片高度，可横滑 */
+.scroll-box.map.fold,
+.scroll-box.scroll-box-ece-nav.map.fold {
+    height: 320rpx;
+    white-space: nowrap;
+}
+
+/**
+* 列表收起条（地图模式）
+*/
+.list-fold-bar {
+    height: 48rpx;
+    border-radius: 24rpx 24rpx 0 0;
+}
+.list-fold-handle {
+    width: 64rpx;
+    height: 8rpx;
+    border-radius: 8rpx;
+    background: #ddd;
+}
+
+/**
+* 地图
+*/
+.map-container {
+    height: 500rpx;
+}
+/* 列表收起后地图占满剩余高度 */
+.map-container.fold {
+    height: calc(100vh - 100rpx - 48rpx - 320rpx);
+}
+.map-container .map-center-icon {
+    top: calc(50% - 30rpx);
+    left: calc(50% - 30rpx);
+    width: 60rpx;
+    height: 60rpx;
+}

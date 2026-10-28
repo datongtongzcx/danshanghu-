@@ -1,0 +1,124 @@
+/*
+* 页面布局
+*/
+.page-delivery-order {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+/*
+* 头部
+*/
+.header {
+    height: auto;
+    flex-shrink: 0;
+}
+.nav-base.delivery-order-nav {
+    height: auto;
+    line-height: normal;
+    padding-top: 10rpx;
+    padding-bottom: 10rpx;
+}
+.nav-base .item {
+    display: inline-block;
+    width: auto;
+    height: 80rpx;
+    line-height: 80rpx;
+    padding: 0 20rpx;
+    white-space: nowrap;
+}
+.nav-base .item .item-name {
+    position: relative;
+    display: inline-block;
+    line-height: 1.2;
+    vertical-align: middle;
+}
+.nav-base .item .badge-icon {
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: auto;
+    width: 0;
+    height: 0;
+    line-height: 0;
+    overflow: visible;
+    z-index: 2;
+    pointer-events: none;
+}
+.nav-search {
+    display: flex;
+    align-items: center;
+}
+.nav-search .search-keywords {
+    flex: 1;
+    min-width: 0;
+    margin-right: 12rpx;
+}
+.nav-search .nav-search-actions {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    height: 66rpx;
+}
+.nav-search .search-action-line {
+    width: 2rpx;
+    height: 36rpx;
+    background: #e5e5e5;
+    margin: 0 8rpx;
+}
+.nav-search .profit-submit,
+.nav-search .map-submit {
+    width: 56rpx;
+    height: 56rpx;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/**
+ * 数据列表
+ */
+.scroll-box {
+    flex: 1;
+    height: 0;
+    min-height: 0;
+}
+.data-list .address-info {
+    width: calc(100% - 58rpx);
+    word-wrap: break-word;
+    word-break: break-all;
+}
+.data-list .address-info .icon-item {
+    right: 0;
+    top: -6rpx;
+    line-height: 54rpx;
+    height: 54rpx;
+    width: 54rpx;
+}
+
+/**
+ * 地图
+ */
+.map-container {
+    flex: 1;
+    height: 0;
+    min-height: 0;
+}
+.map-container .map-markers-active-data {
+    background-color: rgb(255 255 255 / 0.85);
+    width: calc(100% - 40rpx);
+    left: 20rpx;
+    bottom: 20rpx;
+    line-height: 58rpx;
+    box-shadow: 0 0 20rpx rgba(50,55,58,0.2);
+}
+.map-container .map-markers-active-data .map-send-icon {
+    right: 0;
+    top: calc(50% - 22rpx);
+    line-height: 54rpx;
+    height: 54rpx;
+    width: 54rpx;
+}

@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  push:
+    branches: [master, main, develop]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  verify-and-build:
+    name: 校验并构建微信小程序
+    runs-on: ubuntu-latest
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      # vue2 版 uni-app 构建链依赖旧版 Node API（util.isRegExp / MD4），需固定 Node 18
+      - name: 安装 Node 18
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: 安装依赖
+        run: npm ci
+
+      - name: 静态校验
+        run: npm run verify
+
+      - name: 编译微信小程序
+        run: npm run build:mp-weixin
+        env:
+          UNI_CLI_CONTEXT: '.'
+
+      - name: 检查编译产物
+        run: test -f dist/build/mp-weixin/app.json
+
+      - name: 上传编译产物
+        uses: actions/upload-artifact@v4
+        with:
+          name: mp-weixin-${{ github.sha }}
+          path: dist/build/mp-weixin
+          retention-days: 7

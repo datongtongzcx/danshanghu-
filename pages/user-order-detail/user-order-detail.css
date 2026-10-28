@@ -1,0 +1,225 @@
+/*
+* 地址信息
+*/
+.address-detail .icon {
+    width: 30rpx;
+    height: 35rpx !important;
+}
+.address-detail .text {
+    width: calc(100% - 40rpx);
+}
+.address-detail .text {
+    line-height: 36rpx;
+}
+.no-address {
+    height: 85rpx;
+    line-height: 85rpx;
+}
+.address-alias,
+.address-map-submit {
+    padding: 0 15rpx;
+    line-height: 40rpx;
+}
+
+/*
+* 商品信息
+*/
+.goods-base {
+    min-height: 160rpx;
+    margin-left: 180rpx;
+}
+.goods .goods-item:last-child {
+    border-bottom: 0;
+}
+.goods-image {
+    width: 160rpx;
+    height: 160rpx;
+}
+
+/**
+* 扩展数据
+*/
+.extension-list .img-tips {
+    width: 40rpx;
+    height: 40rpx;
+}
+
+/**
+ * 使用指南
+ */
+.use-guide-switch-scroll .item {
+    width: 240rpx;
+}
+.use-guide-switch-scroll .item .icon-content,
+.use-guide-switch-scroll .item .icon {
+    width: 60rpx;
+    height: 60rpx;
+}
+
+/*
+* 虚拟销售信息
+*/
+.site-fictitious .panel-content .tips-value {
+    color: #f37b1d;
+    background-color: #fff2e9;
+    border-color: #ffebdb;
+}
+.site-fictitious .panel-content .left-image {
+    width: 80rpx;
+    height: 80rpx;
+}
+.site-fictitious .panel-content .right-value {
+    width: calc(100% - 100rpx);
+}
+
+/*
+* 自提信息
+*/
+.extraction-take-switch {
+    position: relative;
+}
+.extraction-take-body {
+    width: 100%;
+}
+.extraction-take-goods {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    gap: 16rpx;
+    margin-bottom: 24rpx;
+}
+.extraction-take-goods-images {
+    width: 96rpx;
+    height: 96rpx;
+    flex-shrink: 0;
+}
+.extraction-take-goods-title {
+    flex: 1;
+    min-width: 0;
+    text-align: left;
+}
+.extraction-take-code {
+    padding: 0 88rpx;
+}
+.extraction-take-code .qrcode {
+    width: 280rpx;
+    height: 280rpx;
+    margin: 0 auto;
+    display: block;
+}
+.extraction-take-meta {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: auto;
+    margin-right: auto;
+    width: 420rpx;
+    text-align: left;
+}
+.extraction-take-meta-label {
+    width: 5em;
+    flex-shrink: 0;
+    text-align: right;
+}
+.extraction-take-meta-value {
+    flex: 1;
+    min-width: 0;
+    text-align: left;
+    font-variant-numeric: tabular-nums;
+}
+.extraction-take-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 64rpx;
+    height: 64rpx;
+    border-radius: 50%;
+    background: #f5f5f5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+}
+.extraction-take-prev {
+    left: 0;
+}
+.extraction-take-next {
+    right: 0;
+}
+
+/*
+* 订单商品信息弹层
+*/
+.order-item-goods-info-container .nav-base .item:nth-child(1),
+.order-item-goods-info-container .nav-base .item:nth-child(2) {
+    width: 18%;
+}
+.order-item-goods-info-container .nav-base .item:nth-child(3),
+.order-item-goods-info-container .nav-base .item:nth-child(4) {
+    width: 32%;
+}
+.order-item-goods-info-container .scroll-content {
+    height: 70vh;
+}
+
+/*
+* 订单状态步骤条（对齐门店订单详情）
+*/
+.make-progress-steps {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+}
+.make-progress-step {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 0;
+}
+.make-progress-node {
+    width: 100%;
+    height: 36rpx;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.make-progress-dot {
+    width: 36rpx;
+    height: 36rpx;
+    border-radius: 50%;
+    background: #e8e8e8;
+    z-index: 1;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+}
+.make-progress-dot-num,
+.make-progress-dot-check {
+    font-size: 20rpx;
+    line-height: 1;
+}
+.make-progress-line {
+    position: absolute;
+    left: 50%;
+    right: -50%;
+    top: 50%;
+    height: 4rpx;
+    margin-top: -2rpx;
+    background: #e8e8e8;
+    z-index: 0;
+}
+.make-progress-name {
+    margin-top: 12rpx;
+    font-size: 24rpx;
+    text-align: center;
+    line-height: 1.3;
+}
+.make-progress-step.is-done .make-progress-name,
+.make-progress-step.is-active .make-progress-name {
+    font-weight: 500;
+}

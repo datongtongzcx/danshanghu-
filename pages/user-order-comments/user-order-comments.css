@@ -1,0 +1,12 @@
+.goods-image {
+    width: 120rpx;
+    height: 120rpx;
+}
+.star-icon {
+    width: 48rpx;
+    height: 48rpx;
+}
+.form-content textarea {
+    height: 160rpx !important;
+    min-height: 160rpx !important;
+}

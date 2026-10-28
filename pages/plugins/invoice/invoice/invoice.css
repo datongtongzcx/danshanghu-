@@ -1,0 +1,36 @@
+/*
+* 导航
+*/
+.nav-base {
+    height: 80rpx;
+    line-height: 80rpx;
+}
+.nav-base .item {
+    display: inline-block;
+    padding: 0 28rpx;
+    font-size: 26rpx;
+}
+.scroll-box-ece-nav.top-notice {
+    height: calc(100vh - 154rpx);
+}
+
+/*
+* 操作按钮
+*/
+.item-operation .btn {
+    padding: 0 48rpx;
+    height: 60rpx;
+    line-height: 60rpx;
+}
+
+/*
+* 开票类型弹窗
+*/
+.invoice-business-item {
+    border-bottom: 1px solid #f5f5f5;
+    text-align: center;
+}
+
+.invoice-business-item:last-child {
+    border-bottom: 0;
+}

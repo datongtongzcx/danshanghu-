@@ -1,0 +1,21 @@
+# 依赖与构建产物
+node_modules/
+dist/
+unpackage/
+
+# 本地环境与日志
+.env
+.env.*
+*.log
+npm-debug.log*
+
+# 编辑器 / 系统
+.idea/
+.vscode/
+.hbuilderx/
+.DS_Store
+Thumbs.db
+
+# 临时文件
+.tmp-*
+*.pem

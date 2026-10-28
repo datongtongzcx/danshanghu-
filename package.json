@@ -1,0 +1,45 @@
+{
+    "name": "shopxo-uniapp",
+    "version": "1.0.0",
+    "private": true,
+    "description": "ShopXO 企业级开源电商系统 uni-app 手机端（小程序 / H5 / APP）",
+    "scripts": {
+        "verify": "node scripts/verify-project.js",
+        "dev:mp-weixin": "cross-env NODE_ENV=development UNI_PLATFORM=mp-weixin UNI_INPUT_DIR=. vue-cli-service uni-build --watch",
+        "build:mp-weixin": "cross-env NODE_ENV=production UNI_PLATFORM=mp-weixin UNI_INPUT_DIR=. vue-cli-service uni-build",
+        "build:h5": "cross-env NODE_ENV=production UNI_PLATFORM=h5 UNI_INPUT_DIR=. vue-cli-service uni-build",
+        "upload:mp-weixin": "node scripts/upload-mp-weixin.js"
+    },
+    "dependencies": {
+        "@dcloudio/uni-app": "2.0.2-5020620260917001",
+        "@dcloudio/uni-mp-weixin": "2.0.2-5020620260917001",
+        "hls.js": "^1.6.15",
+        "jweixin-module": "^1.6.0",
+        "vue": "^2.6.14"
+    },
+    "devDependencies": {
+        "@dcloudio/uni-cli-i18n": "2.0.2-5020620260917001",
+        "@dcloudio/uni-cli-shared": "2.0.2-5020620260917001",
+        "@dcloudio/uni-i18n": "2.0.2-5020620260917001",
+        "@dcloudio/uni-template-compiler": "2.0.2-5020620260917001",
+        "@dcloudio/vue-cli-plugin-uni": "2.0.2-5020620260917001",
+        "@dcloudio/webpack-uni-mp-loader": "2.0.2-5020620260917001",
+        "@dcloudio/webpack-uni-pages-loader": "2.0.2-5020620260917001",
+        "@vue/cli-plugin-babel": "~4.5.19",
+        "@vue/cli-service": "~4.5.19",
+        "copy-webpack-plugin": "^6.4.1",
+        "cross-env": "^7.0.3",
+        "miniprogram-ci": "^2.1.31",
+        "postcss": "^8.4.47",
+        "sass": "^1.77.8",
+        "sass-loader": "^10.5.2",
+        "vue-template-compiler": "^2.6.14"
+    },
+    "engines": {
+        "node": ">=16 <21"
+    },
+    "browserslist": [
+        "Android >= 4.4",
+        "ios >= 9"
+    ]
+}

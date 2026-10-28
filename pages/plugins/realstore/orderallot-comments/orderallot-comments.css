@@ -1,0 +1,19 @@
+.goods-image {
+    width: 120rpx;
+    height: 120rpx;
+}
+.staff-avatar {
+    width: 120rpx;
+    height: 120rpx;
+}
+.staff-avatar-placeholder {
+    background: #f5f5f5;
+}
+.star-icon {
+    width: 48rpx;
+    height: 48rpx;
+}
+.form-content textarea {
+    height: 160rpx !important;
+    min-height: 160rpx !important;
+}

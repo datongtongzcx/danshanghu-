@@ -1,0 +1,42 @@
+.nav-base {
+    height: 80rpx;
+    line-height: 80rpx;
+}
+.nav-base .item {
+    display: inline-block;
+    padding: 0 28rpx;
+    font-size: 26rpx;
+}
+.goods-image {
+    width: 160rpx;
+    height: 160rpx;
+}
+.goods-base {
+    min-height: 160rpx;
+    margin-left: 180rpx;
+}
+.item-operation button {
+    margin-left: 16rpx;
+    margin-bottom: 10rpx;
+}
+.order-type-tag {
+    display: inline-block;
+    padding: 0 12rpx;
+    line-height: 36rpx;
+    font-size: 22rpx;
+    border-radius: 8rpx;
+    vertical-align: middle;
+}
+.staff-order-nav-right {
+    width: 100%;
+}
+.staff-order-search {
+    min-width: 0;
+    overflow: hidden;
+}
+.staff-profile-entry {
+    flex-shrink: 0;
+    width: 64rpx;
+    height: 64rpx;
+    margin-left: 8rpx;
+}

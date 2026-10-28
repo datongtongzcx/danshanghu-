@@ -1,0 +1,436 @@
+<template>
+    <view :class="theme_view">
+        <!-- 搜索条件 -->
+        <view class="form-container nav-search bg-white br-b oh padding-horizontal-main padding-bottom-main text-size-xs cr-base pr">
+            <view class="margin-top oh">
+                <view class="fl margin-top">{{$t('team.binding_time')}}</view>
+                <view class="multiple-picker fl tc">
+                    <view class="item br dis-inline-block pr radius tl fl">
+                        <uni-datetime-picker v-model="nav_search_value.team_search_user_time_start" :border="false" :showFirstIcon="false" :hide-second="true" type="datetime" :placeholder="$t('team.start_time')" placeholder-class="cr-grey" />
+                    </view>
+                    <view class="dis-inline-block cr-grey-white margin-top-sm">-</view>
+                    <view class="item br dis-inline-block pr radius tl fr">
+                        <uni-datetime-picker v-model="nav_search_value.team_search_user_time_end" :border="false" :showFirstIcon="false" :hide-second="true" type="datetime" :placeholder="$t('common.end_time')" placeholder-class="cr-grey" />
+                    </view>
+                </view>
+                <checkbox-group class="dis-inline-block fr margin-top-xs" data-value="team_search_user_time_reverse" @change="search_cholce_event">
+                    <label> <checkbox value="1" :checked="nav_search_value.team_search_user_time_reverse.indexOf('1') != -1" style="transform: scale(0.7)" />{{$t('team.reverse')}}</label>
+                </checkbox-group>
+            </view>
+            <block v-if="is_invite_bind_period == 1">
+                <view class="margin-top oh">
+                    <view class="fl margin-top">{{$t('team.expiration_time')}}</view>
+                    <view class="multiple-picker fl tc">
+                        <view class="item br dis-inline-block pr radius tl fl">
+                            <uni-datetime-picker v-model="nav_search_value.team_search_expire_time_start" :border="false" :showFirstIcon="false" :hide-second="true" type="datetime" :placeholder="$t('team.start_time')" placeholder-class="cr-grey" />
+                        </view>
+                        <view class="dis-inline-block cr-grey-white margin-top-sm">-</view>
+                        <view class="item br dis-inline-block pr radius tl fr">
+                            <uni-datetime-picker v-model="nav_search_value.team_search_expire_time_end" :border="false" :showFirstIcon="false" :hide-second="true" type="datetime" :placeholder="$t('common.end_time')" placeholder-class="cr-grey" />
+                        </view>
+                    </view>
+                    <checkbox-group class="dis-inline-block fr margin-top-xs" data-value="team_search_expire_time_reverse" @change="search_cholce_event">
+                        <label> <checkbox value="1" :checked="nav_search_value.team_search_expire_time_reverse.indexOf('1') != -1" style="transform: scale(0.7)" />{{$t('team.reverse')}}</label>
+                    </checkbox-group>
+                </view>
+                <view class="margin-top oh">
+                    <view class="fl margin-top">{{$t('team.release_time')}}</view>
+                    <view class="multiple-picker fl tc">
+                        <view class="item br dis-inline-block pr radius tl fl">
+                            <uni-datetime-picker v-model="nav_search_value.team_search_release_time_start" :border="false" :showFirstIcon="false" :hide-second="true" type="datetime" :placeholder="$t('team.start_time')" placeholder-class="cr-grey" />
+                        </view>
+                        <view class="dis-inline-block cr-grey-white margin-top-sm">-</view>
+                        <view class="item br dis-inline-block pr radius tl fr">
+                            <uni-datetime-picker v-model="nav_search_value.team_search_release_time_end" :border="false" :showFirstIcon="false" :hide-second="true" type="datetime" :placeholder="$t('common.end_time')" placeholder-class="cr-grey" />
+                        </view>
+                    </view>
+                    <checkbox-group class="dis-inline-block fr margin-top-xs" data-value="team_search_release_time_reverse" @change="search_cholce_event">
+                        <label> <checkbox value="1" :checked="nav_search_value.team_search_release_time_reverse.indexOf('1') != -1" style="transform: scale(0.7)" />{{$t('team.reverse')}}</label>
+                    </checkbox-group>
+                </view>
+            </block>
+            <view class="margin-top oh">
+                <view class="fl margin-top">{{$t('team.order_placement_time')}}</view>
+                <view class="multiple-picker fl tc">
+                    <view class="item br dis-inline-block pr radius tl fl">
+                        <uni-datetime-picker v-model="nav_search_value.team_search_order_time_start" :border="false" :showFirstIcon="false" :hide-second="true" type="datetime" :placeholder="$t('team.start_time')" placeholder-class="cr-grey" />
+                    </view>
+                    <view class="dis-inline-block cr-grey-white margin-top-sm">-</view>
+                    <view class="item br dis-inline-block pr radius tl fr">
+                        <uni-datetime-picker v-model="nav_search_value.team_search_order_time_end" :border="false" :showFirstIcon="false" :hide-second="true" type="datetime" :placeholder="$t('common.end_time')" placeholder-class="cr-grey" />
+                    </view>
+                </view>
+                <checkbox-group class="dis-inline-block fr margin-top-xs" data-value="team_search_order_time_reverse" @change="search_cholce_event">
+                    <label> <checkbox value="1" :checked="nav_search_value.team_search_order_time_reverse.indexOf('1') != -1" style="transform: scale(0.7)" />{{$t('team.reverse')}}</label>
+                </checkbox-group>
+            </view>
+            <view class="margin-top oh">
+                <view class="fl">{{$t('team.whether_place_order')}}</view>
+                <checkbox-group data-value="team_search_buy_type" @change="search_cholce_event">
+                    <label> <checkbox value="0" :checked="nav_search_value.team_search_buy_type.indexOf('0') != -1" style="transform: scale(0.7)" />{{$t('promotion-user.not_placed_order')}}</label>
+                    <label class="margin-left-xxl"> <checkbox value="1" :checked="nav_search_value.team_search_buy_type.indexOf('1') != -1" style="transform: scale(0.7)" />{{$t('promotion-user.ordered')}}</label>
+                </checkbox-group>
+            </view>
+            <view class="search-submit-list pa">
+                <button type="default" size="mini" class="bg-grey br-grey cr-base text-size-xs round margin-right-main" @tap="search_reset_event">{{$t('team.reset')}}</button>
+                <button type="default" size="mini" class="bg-main br-main cr-white text-size-xs round" @tap="search_submit_event">{{$t('common.search')}}</button>
+            </view>
+        </view>
+
+        <!-- 数据列表 -->
+        <scroll-view :scroll-y="true" :class="'scroll-box' + (is_invite_bind_period == 1 ? ' scroll-box-invite' : '')" @scrolltolower="scroll_lower" lower-threshold="60">
+            <view v-if="data_list.length > 0" class="data-list padding-horizontal-main padding-top-main">
+                <view v-for="(item, index) in data_list" :key="index" class="item padding-main border-radius-main oh bg-white spacing-mb">
+                    <view class="base oh br-b padding-bottom-main">
+                        <image class="avatar dis-block fl circle" :src="item.avatar" mode="widthFix" @tap="avatar_event" :data-value="item.avatar"></image>
+                        <text class="cr-base margin-left-sm">{{ item.user_name_view || "" }}</text>
+                        <text class="cr-base fr">{{ item.bind_time || item.add_time || "" }}</text>
+                    </view>
+                    <view class="content margin-top">
+                        <component-panel-content
+                            :propData="item"
+                            :propDataField="field_list"
+                            propIsItemShowMax="10"
+                            propExcludeField="bind_time"
+                            :propIsTerse="true"
+                        ></component-panel-content>
+                    </view>
+                    <view class="item-operation tr br-t padding-top-main margin-top-main">
+                        <button v-if="(item.email || null) != null" class="round bg-white br cr-base" type="default" size="mini" hover-class="none" @tap="text_event" data-event="copy" :data-value="item.email">{{$t('common.mailbox')}}</button>
+                        <button v-if="(item.mobile || null) != null" class="round bg-white br cr-base" type="default" size="mini" hover-class="none" @tap="text_event" data-event="tel" :data-value="item.mobile">{{$t('common.order_phone')}}</button>
+                        <button class="round bg-white br cr-base" type="default" size="mini" hover-class="none" @tap="user_order_event" :data-value="item.number_code">{{$t('promotion-user.user_orders')}}</button>
+                    </view>
+                </view>
+            </view>
+            <view v-else>
+                <!-- 提示信息 -->
+                <component-no-data :propStatus="data_list_loding_status"></component-no-data>
+            </view>
+
+            <!-- 结尾 -->
+            <component-bottom-line :propStatus="data_bottom_line_status"></component-bottom-line>
+        </scroll-view>
+
+        <!-- 公共 -->
+        <component-common ref="common"></component-common>
+    </view>
+</template>
+<script>
+    const app = getApp();
+    import componentCommon from '@/components/common/common';
+    import componentNoData from "@/components/no-data/no-data";
+    import componentBottomLine from "@/components/bottom-line/bottom-line";
+    import componentPanelContent from '@/pages/common/components/panel-content/panel-content';
+    import pluginLocale from '../locale/index.js';
+
+    export default {
+        mixins: [pluginLocale],
+        data() {
+            return {
+                theme_view: app.globalData.get_theme_value_view(),
+                data_list: [],
+                field_list: [],
+                data_total: 0,
+                data_page_total: 0,
+                data_page: 1,
+                data_list_loding_status: 1,
+                data_bottom_line_status: false,
+                data_is_loading: 0,
+                params: null,
+                is_invite_bind_period: 0,
+                nav_search_buy_type_list: [
+                    { value: -1, name: this.$t('common.all') },
+                    { value: 0, name: this.$t('promotion-user.not_placed_order') },
+                    { value: 1, name: this.$t('promotion-user.ordered') },
+                ],
+                nav_search_value: {
+                    team_search_user_time_start: "",
+                    team_search_user_time_end: "",
+                    team_search_user_time_reverse: [],
+                    team_search_expire_time_start: "",
+                    team_search_expire_time_end: "",
+                    team_search_expire_time_reverse: [],
+                    team_search_release_time_start: "",
+                    team_search_release_time_end: "",
+                    team_search_release_time_reverse: [],
+                    team_search_order_time_start: "",
+                    team_search_order_time_end: "",
+                    team_search_order_time_reverse: [],
+                    team_search_buy_type: [],
+                },
+            };
+        },
+
+        components: {
+            componentCommon,
+            componentNoData,
+            componentBottomLine,
+            componentPanelContent,
+        },
+
+        onLoad(params) {
+            // 参数处理
+            params = app.globalData.launch_params_handle(params);
+
+            // 调用公共事件方法
+            app.globalData.page_event_onload_handle(params);
+
+            // 设置参数
+            this.setData({
+                params: params,
+            });
+
+            // 初始数据
+            this.init();
+        },
+
+        onShow() {
+            // 调用公共事件方法
+            app.globalData.page_event_onshow_handle();
+
+            // 公共onshow事件（$refs 未就绪时自动延后重试）
+            app.globalData.page_common_on_show(this);
+
+            // 分享菜单处理
+            app.globalData.page_share_handle();
+        },
+
+        // 下拉刷新
+        onPullDownRefresh() {
+            this.setData({
+                data_page: 1,
+            });
+            this.get_data_list(1);
+        },
+
+        methods: {
+            init() {
+                var user = app.globalData.get_user_info(this, "init");
+                if (user != false) {
+                    this.get_data_list();
+                } else {
+                    this.setData({
+                        data_list_loding_status: 0,
+                        data_bottom_line_status: false,
+                    });
+                }
+            },
+
+            // 获取数据
+            get_data_list(is_mandatory) {
+                // 分页是否还有数据
+                if ((is_mandatory || 0) == 0) {
+                    if (this.data_bottom_line_status == true) {
+                        uni.stopPullDownRefresh();
+                        return false;
+                    }
+                }
+
+                // 是否加载中
+                if (this.data_is_loading == 1) {
+                    return false;
+                }
+                this.setData({
+                    data_is_loading: 1,
+                    data_list_loding_status: 1,
+                });
+
+                // 加载loding
+                if(this.data_page > 1) {
+                    uni.showLoading({
+                        title: this.$t('common.loading_in_text'),
+                    });
+                }
+
+                // 请求参数
+                var data = {
+                    page: this.data_page,
+                };
+
+                // 搜索绑定时间
+                if ((this.nav_search_value.team_search_user_time_start || null) != null) {
+                    data["team_search_user_time_start"] = this.nav_search_value.team_search_user_time_start;
+                }
+                if ((this.nav_search_value.team_search_user_time_end || null) != null) {
+                    data["team_search_user_time_end"] = this.nav_search_value.team_search_user_time_end;
+                }
+                // 绑定反向
+                if (this.nav_search_value.team_search_user_time_reverse.length > 0) {
+                    data["team_search_user_time_reverse"] = 1;
+                }
+
+                // 搜索过期时间
+                if (this.is_invite_bind_period == 1) {
+                    if ((this.nav_search_value.team_search_expire_time_start || null) != null) {
+                        data["team_search_expire_time_start"] = this.nav_search_value.team_search_expire_time_start;
+                    }
+                    if ((this.nav_search_value.team_search_expire_time_end || null) != null) {
+                        data["team_search_expire_time_end"] = this.nav_search_value.team_search_expire_time_end;
+                    }
+                    if (this.nav_search_value.team_search_expire_time_reverse.length > 0) {
+                        data["team_search_expire_time_reverse"] = 1;
+                    }
+
+                    // 搜索解除时间
+                    if ((this.nav_search_value.team_search_release_time_start || null) != null) {
+                        data["team_search_release_time_start"] = this.nav_search_value.team_search_release_time_start;
+                    }
+                    if ((this.nav_search_value.team_search_release_time_end || null) != null) {
+                        data["team_search_release_time_end"] = this.nav_search_value.team_search_release_time_end;
+                    }
+                    if (this.nav_search_value.team_search_release_time_reverse.length > 0) {
+                        data["team_search_release_time_reverse"] = 1;
+                    }
+                }
+
+                // 搜索下单时间
+                if ((this.nav_search_value.team_search_order_time_start || null) != null) {
+                    data["team_search_order_time_start"] = this.nav_search_value.team_search_order_time_start;
+                }
+                if ((this.nav_search_value.team_search_order_time_end || null) != null) {
+                    data["team_search_order_time_end"] = this.nav_search_value.team_search_order_time_end;
+                }
+                // 订单反向
+                if (this.nav_search_value.team_search_order_time_reverse.length > 0) {
+                    data["team_search_order_time_reverse"] = 1;
+                }
+
+                // 搜索是否下单
+                if (this.nav_search_value.team_search_buy_type.length > 0) {
+                    data["team_search_buy_type"] = this.nav_search_value.team_search_buy_type.join(",");
+                }
+
+                // 获取数据
+                uni.request({
+                    url: app.globalData.get_request_url("index", "team", "distribution"),
+                    method: "POST",
+                    data: data,
+                    dataType: "json",
+                    success: (res) => {
+                        if(this.data_page > 1) {
+                            uni.hideLoading();
+                        }
+                        uni.stopPullDownRefresh();
+                        if (res.data.code == 0) {
+                            var result = res.data.data || {};
+                            var rows = result.data_list || result.data || [];
+                            var page_total = result.page_total != null ? result.page_total : 0;
+                            var total = result.data_total != null ? result.data_total : result.total != null ? result.total : 0;
+                            var temp_data_list = [];
+                            if (this.data_page <= 1) {
+                                temp_data_list = rows;
+                            } else {
+                                temp_data_list = this.data_list || [];
+                                for (var i in rows) {
+                                    temp_data_list.push(rows[i]);
+                                }
+                            }
+                            this.setData({
+                                data_list: temp_data_list,
+                                field_list: result.field_list || this.field_list || [],
+                                is_invite_bind_period: result.is_invite_bind_period != null ? result.is_invite_bind_period : this.is_invite_bind_period,
+                                data_total: total,
+                                data_page_total: page_total,
+                                data_list_loding_status: temp_data_list.length > 0 ? 3 : 0,
+                                data_page: this.data_page + 1,
+                                data_is_loading: 0,
+                            });
+                            this.setData({
+                                data_bottom_line_status: this.data_list.length > 0 && this.data_page > 1 && this.data_page > this.data_page_total,
+                            });
+                            if (this.data_page <= 1 && temp_data_list.length == 0) {
+                                this.setData({
+                                    data_list: [],
+                                    data_bottom_line_status: false,
+                                });
+                            }
+                        } else {
+                            this.setData({
+                                data_list_loding_status: 0,
+                                data_is_loading: 0,
+                            });
+                            if (app.globalData.is_login_check(res.data, this, "get_data_list")) {
+                                app.globalData.showToast(res.data.msg);
+                            }
+                        }
+                    },
+                    fail: () => {
+                        if(this.data_page > 1) {
+                            uni.hideLoading();
+                        }
+                        uni.stopPullDownRefresh();
+                        this.setData({
+                            data_list_loding_status: 2,
+                            data_is_loading: 0,
+                        });
+                        app.globalData.showToast(this.$t('common.internet_error_tips'));
+                    },
+                });
+            },
+
+            // 滚动加载
+            scroll_lower(e) {
+                this.get_data_list();
+            },
+
+            // 头像查看
+            avatar_event(e) {
+                var value = e.currentTarget.dataset.value || null;
+                if (value != null) {
+                    uni.previewImage({
+                        current: value,
+                        urls: [value],
+                    });
+                } else {
+                    app.globalData.showToast(this.$t('common.avatar_address_incorrect'));
+                }
+            },
+
+            // 用户订单事件
+            user_order_event(e) {
+                var value = e.currentTarget.dataset.value;
+                app.globalData.url_open('/pages/plugins/distribution/order/order?user=' + value);
+            },
+
+            // 搜索条件事件
+            search_cholce_event(e) {
+                var value = e.currentTarget.dataset.value;
+                var temp_data = this.nav_search_value;
+                temp_data[value] = e.detail.value;
+                this.setData({
+                    nav_search_value: temp_data,
+                });
+            },
+
+            // 搜索重置事件
+            search_reset_event(e) {
+                var temp_data = this.nav_search_value;
+                var arr_field = ["team_search_buy_type", "team_search_order_time_reverse", "team_search_user_time_reverse", "team_search_expire_time_reverse", "team_search_release_time_reverse"];
+                for (var i in temp_data) {
+                    temp_data[i] = arr_field.indexOf(i) == -1 ? "" : [];
+                }
+                this.setData({
+                    nav_search_value: temp_data,
+                    data_page: 1,
+                });
+                this.get_data_list(1);
+            },
+
+            // 搜索确认事件
+            search_submit_event(e) {
+                this.setData({
+                    data_page: 1,
+                });
+                this.get_data_list(1);
+            },
+
+            // 文本事件
+            text_event(e) {
+                app.globalData.text_event_handle(e);
+            },
+        },
+    };
+</script>
+<style>
+    @import "./team.css";
+</style>

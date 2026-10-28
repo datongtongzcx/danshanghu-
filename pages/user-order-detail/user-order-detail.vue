@@ -1,0 +1,1116 @@
+<template>
+    <view :class="theme_view">
+        <block v-if="detail != null">
+            <view class="padding-horizontal-main padding-top-main">
+                <!-- 基础状态和操作 -->
+                <view class="bg-white padding-main border-radius-main tc spacing-mb">
+                    <view class="padding-vertical-xl">
+                        <!-- 订单状态（优先 status_progress，兼容旧数据） -->
+                        <block v-if="status_progress_style == 'danger'">
+                            <view class="dis-inline-block va-m">
+                                <iconfont name="icon-sigh-o" size="68rpx" propClass="cr-red"></iconfont>
+                            </view>
+                            <text class="text-size-xl margin-top-sm va-m margin-left-sm cr-red">{{ status_progress_name }}</text>
+                        </block>
+                        <block v-else-if="status_progress_style == 'success'">
+                            <view class="dis-inline-block va-m">
+                                <iconfont name="icon-enable" size="68rpx" propClass="cr-green"></iconfont>
+                            </view>
+                            <text class="text-size-xl margin-top-sm va-m margin-left-sm cr-green">{{ status_progress_name }}</text>
+                        </block>
+                        <block v-else-if="status_progress_style == 'primary'">
+                            <view class="dis-inline-block va-m">
+                                <iconfont name="icon-inventroy-manage" size="68rpx" propClass="cr-blue"></iconfont>
+                            </view>
+                            <text class="text-size-xl margin-top-sm va-m margin-left-sm cr-blue">{{ status_progress_name }}</text>
+                        </block>
+                        <block v-else-if="status_progress_style == 'warning'">
+                            <view class="dis-inline-block va-m">
+                                <iconfont name="icon-wait-receive-delivery" size="68rpx" propClass="cr-yellow"></iconfont>
+                            </view>
+                            <text class="text-size-xl margin-top-sm va-m margin-left-sm cr-yellow">{{ status_progress_name }}</text>
+                        </block>
+                        <block v-else>
+                            <view class="dis-inline-block va-m">
+                                <iconfont name="icon-wait-payment" size="68rpx"></iconfont>
+                            </view>
+                            <text class="text-size-xl margin-top-sm va-m margin-left-sm">{{ status_progress_name }}</text>
+                        </block>
+                        <view v-if="detail.status == 1" class="cr-price fw-b margin-top-sm">
+                            <text class="text-size">{{payment_currency_symbol}}</text>
+                            <text class="text-size-xl margin-left-xs">{{pay_price}}</text>
+                        </view>
+                        <view v-if="status_progress_tips" class="cr-grey text-size-xs margin-top-sm">{{ status_progress_tips }}</view>
+                        <view v-if="status_progress_steps.length > 0" class="make-progress-steps margin-top-main">
+                            <view
+                                v-for="(step, index) in status_progress_steps"
+                                :key="step.key"
+                                class="make-progress-step"
+                                :class="make_step_class(index)"
+                            >
+                                <view class="make-progress-node">
+                                    <view class="make-progress-dot" :class="make_step_done(index) || make_step_active(index) ? 'bg-main' : ''">
+                                        <text v-if="make_step_done(index)" class="make-progress-dot-check cr-white">✓</text>
+                                        <text v-else class="make-progress-dot-num" :class="make_step_active(index) ? 'cr-white' : 'cr-grey'">{{ index + 1 }}</text>
+                                    </view>
+                                    <view v-if="index < status_progress_steps.length - 1" class="make-progress-line" :class="make_step_done(index) ? 'bg-main' : ''"></view>
+                                </view>
+                                <text class="make-progress-name" :class="make_step_active(index) ? 'cr-main' : (make_step_done(index) ? 'cr-base' : 'cr-grey')">{{ step.name }}</text>
+                            </view>
+                        </view>
+                    </view>
+                    <component-order-operate-more
+                        :propOrder="detail"
+                        propSource="detail"
+                        propClass="item-operation margin-top-sm"
+                        @cancel="order_operate_cancel_event"
+                        @pay="order_operate_pay_event"
+                        @collect="order_operate_collect_event"
+                        @delete="order_operate_delete_event"
+                    ></component-order-operate-more>
+                </view>
+
+                <!-- 取货信息 -->
+                <view v-if="(detail.extraction_data || null) != null" class="extraction-take padding-main border-radius-main bg-white spacing-mb">
+                    <view class="br-b padding-bottom-main fw-b text-size">{{$t('common.take_info_title')}}</view>
+                    <view class="padding-top-main">
+                        <view v-if="(detail.extraction_data.items || null) != null && detail.extraction_data.items.length > 0" class="extraction-take-switch">
+                            <view v-if="detail.extraction_data.items.length > 1" class="extraction-take-arrow extraction-take-prev" @tap="extraction_take_prev_event">
+                                <iconfont name="icon-angle-left" size="36rpx" color="#666"></iconfont>
+                            </view>
+                            <view class="extraction-take-body">
+                                <view v-if="(detail.extraction_data.items[extraction_take_index].goods_url || null) != null && detail.extraction_data.items[extraction_take_index].goods_url != ''" class="extraction-take-goods cp" :data-value="detail.extraction_data.items[extraction_take_index].goods_url" @tap="url_event">
+                                    <image v-if="(detail.extraction_data.items[extraction_take_index].goods_images || null) != null" class="extraction-take-goods-images br radius" :src="detail.extraction_data.items[extraction_take_index].goods_images" mode="aspectFill"></image>
+                                    <view class="extraction-take-goods-title text-size-sm multi-text">{{ detail.extraction_data.items[extraction_take_index].goods_title || '' }}</view>
+                                </view>
+                                <view v-else class="extraction-take-goods">
+                                    <image v-if="(detail.extraction_data.items[extraction_take_index].goods_images || null) != null" class="extraction-take-goods-images br radius" :src="detail.extraction_data.items[extraction_take_index].goods_images" mode="aspectFill"></image>
+                                    <view class="extraction-take-goods-title text-size-sm multi-text">{{ detail.extraction_data.items[extraction_take_index].goods_title || '' }}</view>
+                                </view>
+                                <view class="extraction-take-code tc">
+                                    <image v-if="(detail.extraction_data.items[extraction_take_index].images || null) != null" class="qrcode br radius" :src="detail.extraction_data.items[extraction_take_index].images" mode="aspectFill"></image>
+                                    <view class="extraction-take-meta margin-top-sm">
+                                        <text class="extraction-take-meta-label cr-grey">{{$t('common.take_code_label')}}</text>
+                                        <view class="extraction-take-meta-value">
+                                            <block v-if="(detail.extraction_data.items[extraction_take_index].code || null) == null || detail.extraction_data.items[extraction_take_index].code == ''">
+                                                <text class="cr-red">{{$t('common.pickup_code_does_exist_contact_administrator')}}</text>
+                                            </block>
+                                            <block v-else>
+                                                <view class="dis-inline-block" :data-value="detail.extraction_data.items[extraction_take_index].code" @tap="text_copy_event">
+                                                    <text class="fw-b cr-blue text-size">{{ detail.extraction_data.items[extraction_take_index].code }}</text>
+                                                    <text class="bg-white br-green cr-green round padding-horizontal-sm text-size-xs va-m margin-left-sm">{{$t('common.copy')}}</text>
+                                                </view>
+                                            </block>
+                                        </view>
+                                    </view>
+                                    <view class="extraction-take-meta margin-top-xs">
+                                        <text class="extraction-take-meta-label cr-grey">{{$t('common.take_verify_label')}}</text>
+                                        <view class="extraction-take-meta-value">
+                                            <text class="cr-green">{{ detail.extraction_data.items[extraction_take_index].verify_number || 0 }}</text>
+                                            <text class="cr-grey">/</text>
+                                            <text>{{ detail.extraction_data.items[extraction_take_index].total_number || 1 }}</text>
+                                        </view>
+                                    </view>
+                                </view>
+                            </view>
+                            <view v-if="detail.extraction_data.items.length > 1" class="extraction-take-arrow extraction-take-next" @tap="extraction_take_next_event">
+                                <iconfont name="icon-angle-right" size="36rpx" color="#666"></iconfont>
+                            </view>
+                        </view>
+                        <view v-else class="extraction-take-code tc">
+                            <image v-if="(detail.extraction_data.images || null) != null" class="qrcode br radius" :src="detail.extraction_data.images" mode="aspectFill"></image>
+                            <view class="margin-top-sm" :data-value="detail.extraction_data.code" @tap="text_copy_event">
+                                <text class="fw-b cr-blue text-size-xl va-m">{{ detail.extraction_data.code || $t('common.pickup_code_does_exist_contact_administrator') }}</text>
+                                <text v-if="(detail.extraction_data.code || null) != null" class="bg-white br-green cr-green round padding-horizontal-sm text-size-xs va-m margin-left">{{$t('common.copy')}}</text>
+                            </view>
+                        </view>
+                    </view>
+                </view>
+
+                <!-- 地址 -->
+                <view v-if="(detail.address_data || null) != null" class="address bg-white padding-horizontal-main padding-top-main border-radius-main spacing-mb">
+                    <view class="address-base padding-top-xs padding-bottom oh">
+                        <text v-if="(detail.address_data.alias || null) != null" class="address-alias round br-main cr-main bg-white margin-right-sm">{{ detail.address_data.alias }}</text>
+                        <text>{{ detail.address_data.name }}</text>
+                        <text class="fr">{{ detail.address_data.tel }}</text>
+                    </view>
+                    <view class="address-detail oh margin-bottom-main">
+                        <image class="icon fl" :src="common_static_url + 'map-icon.png'" mode="widthFix"></image>
+                        <view class="text fr">
+                            <text>{{ detail.address_data.province_name }}{{ detail.address_data.city_name }}{{ detail.address_data.county_name }}{{ detail.address_data.address }}</text>
+                            <text v-if="(detail.address_data.lng || 0) != 0 && (detail.address_data.lat || 0) != 0" class="address-map-submit cr-base br round bg-white margin-left-sm text-size-xs" @tap="address_map_event">{{$t('common.view_location')}}</text>
+                        </view>
+                    </view>
+                    <view v-if="(detail.address_data.extraction_contact_name || null) != null || (detail.address_data.extraction_contact_tel || null) != null || (detail.address_data.appoint_time || null) != null" class="padding-vertical-main br-t-dashed">
+                        <view>
+                            <text v-if="(detail.address_data.extraction_contact_name || null) != null" class="margin-right-xxl">{{detail.address_data.extraction_contact_name}}</text>
+                            <text v-if="(detail.address_data.extraction_contact_tel || null) != null">{{detail.address_data.extraction_contact_tel}}</text>
+                        </view>
+                        <view v-if="(detail.address_data.tel || null) != null" class="cr-red">{{detail.address_data.appoint_time}}</view>
+                    </view>
+                    <view class="address-divider spacing-mb"></view>
+                </view>
+
+                <!-- 商品列表 -->
+                <view v-if="(detail.items || null) != null && detail.items.length > 0" class="goods bg-white padding-main border-radius-main spacing-mb">
+                    <view class="br-b padding-bottom-main fw-b text-size">{{$t('common.product_information')}}</view>
+                    <view v-for="(item, index) in detail.items" :key="index" class="goods-item br-b-dashed oh padding-vertical-main">
+                        <view :data-value="item.goods_url" @tap="url_event" class="cp">
+                            <image class="goods-image fl radius" :src="item.images" mode="aspectFill"></image>
+                            <view class="goods-base pr">
+                                <view class="multi-text">{{ item.title }}</view>
+                                <view v-if="item.spec != null" class="margin-top-xs">
+                                    <block v-for="(sv, si) in item.spec" :key="si">
+                                        <text v-if="si > 0" class="cr-grey padding-left-xs padding-right-xs">;</text>
+                                        <text class="cr-grey">{{ sv.value }}</text>
+                                    </block>
+                                </view>
+                                <view class="margin-top-xs">
+                                    <text class="fw-b">{{ detail.currency_data.currency_symbol }}{{ item.price }}</text>
+                                    <text class="margin-left-sm">x{{ item.buy_number }}</text>
+                                </view>
+                                <view class="pa right-0 bottom-0 z-i">
+                                    <text v-if="detail.is_can_launch_aftersale == 1 && (item.orderaftersale_btn_text || null) != null" class="cr-blue bg-white" @tap.stop="orderaftersale_event" :data-oid="detail.id" :data-did="item.id">{{ item.orderaftersale_btn_text }}</text>
+                                    <view v-if="common_is_order_show_goods_snapshot == 1" class="dis-inline-block margin-left" @tap.stop="popup_order_item_goods_info_event" :data-index="index">
+                                        <text class="margin-right-xs">{{$t('common.product_information')}}</text>
+                                        <iconfont name="icon-arrow-down" color="#999" propClass="va-m"></iconfont>
+                                    </view>
+                                </view>
+                            </view>
+                        </view>
+                    </view>
+                    <view class="padding-top-main tr cr-base text-size">
+                        <text>{{$t('common.total')}}<text class="fw-b">{{ detail.buy_number_count }}</text>{{$t('common.total_pieces')}}<text class="sales-price margin-right-xs">{{ detail.currency_data.currency_symbol }}{{ detail.total_price }}</text></text>
+                    </view>
+                </view>
+
+                <!-- 使用指南 -->
+                <view v-if="(detail.use_guide_data || null) != null && (detail.use_guide_data.data || null) != null && detail.use_guide_data.data.length > 0" class="panel-item padding-main border-radius-main bg-white spacing-mb">
+                    <view class="br-b padding-bottom-main fw-b text-size">{{detail.use_guide_data.title}}</view>
+                    <view class="scroll-view-horizontal margin-top">
+                        <scroll-view :scroll-x="true" :show-scrollbar="false" :scroll-with-animation="true" :scroll-into-view="'use-guide-switch-item-' + goods_use_guide_data_active_index" class="use-guide-switch-scroll">
+                            <block v-for="(item, index) in detail.use_guide_data.data" :key="index">
+                                <view :class="'item tc cp dis-inline-block'+(index > 0 ? ' margin-left' : '')" :id="'use-guide-switch-item-' + index" :data-index="index" @tap="goods_use_guide_data_switch_event">
+                                    <view :class="'icon-content circle br auto ' + (goods_use_guide_data_active_index == index ? 'border-color-main' : '')">
+                                        <image :src="item.images" mode="aspectFit" class="icon dis-block circle"></image>
+                                    </view>
+                                    <view class="single-text margin-top-xs" :class="goods_use_guide_data_active_index == index ? 'cr-main' : 'cr-base'">{{ item.title }} </view>
+                                </view>
+                            </block>
+                        </scroll-view>
+                    </view>
+                    <view v-if="(detail.use_guide_data.desc || null) != null" class="margin-top-xs text-size-xs cr-grey">{{detail.use_guide_data.desc}}</view>
+                    <view class="br radius padding-main margin-top-sm">
+                        <view v-if="(detail.use_guide_data.data[goods_use_guide_data_active_index]['goods_use_guide'] || null) != null" class="web-html-content">
+                            <mp-html :content="detail.use_guide_data.data[goods_use_guide_data_active_index]['goods_use_guide']" />
+                        </view>
+                        <block v-else>
+                            <component-no-data propStatus="0"></component-no-data>
+                        </block>
+                    </view>
+                </view>
+
+                <!-- 服务信息 -->
+                <view v-if="(detail.service_data || null) != null" class="express-data panel-item padding-main border-radius-main bg-white spacing-mb">
+                    <view class="br-b padding-bottom-main fw-b text-size">{{$t('user-order-detail.service_information')}}</view>
+                    <view class="panel-content oh">
+                        <uni-table :emptyText="$t('common.no_data')">
+                            <uni-tr>
+                                <uni-th width="100">{{$t('user-order-detail.service_name')}}</uni-th>
+                                <uni-th width="180">{{$t('user-order-detail.service_mobile')}}</uni-th>
+                                <uni-th width="120">{{$t('user-order-detail.service_duration')}}</uni-th>
+                                <uni-th width="350">{{$t('common.service_time')}}</uni-th>
+                            </uni-tr>
+                            <block v-for="(item, index) in detail.service_data" :key="index">
+                                <uni-tr>
+                                    <uni-td>{{ item.service_name }}</uni-td>
+                                    <uni-td>
+                                        <view :data-value="item.service_mobile" @tap="text_copy_event">
+                                            <text>{{ item.service_mobile }}</text>
+                                            <text class="bg-white br-green cr-green round padding-horizontal-sm text-size-xs margin-left-sm">{{$t('common.copy')}}</text>
+                                        </view>
+                                    </uni-td>
+                                    <uni-td>{{ item.service_duration_minute_text }}</uni-td>
+                                    <uni-td>
+                                        <text v-if="(item.service_start_time || null) != null">{{ item.service_start_time }}</text>
+                                        <block v-if="(item.service_end_time || null) != null">
+                                            <text class="cr-grey padding-horizontal-sm">~</text>
+                                            <text>{{ item.service_end_time }}</text>
+                                        </block>
+                                    </uni-td>
+                                </uni-tr>
+                            </block>
+                        </uni-table>
+                    </view>
+                </view>
+
+                <!-- 虚拟销售数据 -->
+                <view v-if="(site_fictitious || null) != null" class="site-fictitious panel-item padding-horizontal-main padding-top-main border-radius-main bg-white spacing-mb">
+                    <view class="br-b padding-bottom-main fw-b text-size">{{ site_fictitious.title || $t('user-order-detail.key_information') }}</view>
+                    <view class="panel-content oh padding-top-main">
+                        <view v-if="(site_fictitious.tips || null) != null" class="tips-value radius padding-main margin-bottom-main">
+                            <mp-html :content="site_fictitious.tips" />
+                        </view>
+                        <view v-for="(item, index) in detail.items" :key="index" class="item br-b-dashed oh padding-bottom-main margin-bottom-main">
+                            <image class="left-image br fl radius" :src="item.images" mode="aspectFill"></image>
+                            <view class="right-value fr">
+                                <view v-if="(item.spec_text || null) != null" class="text-base fw-b margin-bottom-sm text-size-xs">{{item.spec_text}}</view>
+                                <mp-html v-if="(item.fictitious_goods_value || null) != null" :content="item.fictitious_goods_value" />
+                                <text v-else class="cr-grey text-size-xs">{{$t('common.unconfigured_data')}}</text>
+                            </view>
+                        </view>
+                    </view>
+                </view>
+
+                <!-- 订单基础数据 -->
+                <view v-if="detail_list.length > 0" class="panel-item padding-main border-radius-main bg-white spacing-mb">
+                    <view class="br-b padding-bottom-main fw-b text-size">{{$t('common.order_information')}}</view>
+                    <view class="panel-content oh">
+                        <uni-table :emptyText="$t('common.no_data')">
+                            <block v-for="(item, index) in detail_list" :key="index">
+                                <uni-tr>
+                                    <uni-th width="90">{{item.name}}</uni-th>
+                                    <uni-td>
+                                        <view v-if="(item.is_copy || 0) == 1" :data-value="item.value" @tap="text_copy_event">
+                                            <text>{{ item.value }}</text>
+                                            <text class="bg-white br-green cr-green round padding-horizontal-sm text-size-xs margin-left-sm">{{$t('common.copy')}}</text>
+                                        </view>
+                                        <block v-else>{{ item.value }}</block>
+                                    </uni-td>
+                                </uni-tr>
+                            </block>
+                        </uni-table>
+                    </view>
+                </view>
+
+                <!-- 快递信息 -->
+                <view v-if="(detail.express_data || null) != null && detail.express_data.length > 0" class="express-data panel-item padding-main border-radius-main bg-white spacing-mb">
+                    <view class="br-b padding-bottom-main fw-b text-size">{{$t('common.express_delivery_info')}}</view>
+                    <view class="panel-content oh">
+                        <uni-table :emptyText="$t('common.no_data')">
+                            <uni-tr>
+                                <uni-th width="110">{{$t('common.express_delivery_company')}}</uni-th>
+                                <uni-th width="260">{{$t('common.express_tracking_number')}}</uni-th>
+                                <uni-th width="300">{{$t('common.note')}}</uni-th>
+                            </uni-tr>
+                            <block v-for="(item, index) in detail.express_data" :key="index">
+                                <uni-tr>
+                                    <uni-td>
+                                        <view :data-value="item.express_name" @tap="text_copy_event">{{item.express_name}}</view>
+                                    </uni-td>
+                                    <uni-td>
+                                        <view :data-value="item.express_number" @tap="text_copy_event">
+                                            <text>{{item.express_number}}</text>
+                                            <text class="bg-white br-green cr-green round padding-horizontal-sm text-size-xs margin-left-sm">{{$t('common.copy')}}</text>
+                                        </view>
+                                    </uni-td>
+                                    <uni-td>
+                                        <view :data-value="item.note" @tap="text_copy_event">{{item.note}}</view>
+                                    </uni-td>
+                                </uni-tr>
+                            </block>
+                        </uni-table>
+                    </view>
+                </view>
+                
+                <!-- 溯源数据 -->
+                <view v-if="(detail.trace_source_data || null) != null && (detail.items || null) != null && detail.items.length > 0" class="express-data panel-item padding-main border-radius-main bg-white spacing-mb">
+                    <view class="br-b padding-bottom-main fw-b text-size">{{$t('user-order-detail.traceability_info')}}</view>
+                    <view class="panel-content oh">
+                        <block v-for="(item, index) in detail.items" :key="index">
+                            <view :class="index > 0 ? 'margin-top-xxxxl' : 'margin-top-sm'" :data-value="item.goods_url" @tap="url_event">
+                                <image :src="item.images" mode="aspectFill" class="goods-image fl radius"></image>
+                                <view class="goods-base">
+                                    <view class="multi-text">{{item.title}}</view>
+                                    <view class="margin-top-xs">
+                                        <text class="fw-b">{{ detail.currency_data.currency_symbol }}{{ item.price }}</text>
+                                        <text class="margin-left-sm">x{{ item.buy_number }}</text>
+                                    </view>
+                                </view>
+                            </view>
+                            <uni-table :emptyText="$t('common.no_data')">
+                                <uni-tr>
+                                    <uni-th width="60">{{$t('common.num')}}</uni-th>
+                                    <uni-th width="200">{{$t('user-order-detail.traceability_code')}}</uni-th>
+                                    <uni-th width="200">{{$t('user-order-detail.batch_number')}}</uni-th>
+                                    <uni-th width="120">{{$t('user-order-detail.batch_expiry_date')}}</uni-th>
+                                </uni-tr>
+                                <block v-for="(item2, index2) in item.buy_number" :key="index2">
+                                    <uni-tr v-if="(detail.trace_source_data[item['id']] || null) != null && (detail.trace_source_data[item['id']][index2+1] || null) != null">
+                                        <uni-td>{{$t('common.num')}}{{index2+1}}</uni-td>
+                                        <uni-td>
+                                            <view v-if="(detail.trace_source_data[item['id']][index2+1]['code'] || null) != null" :data-value="detail.trace_source_data[item['id']][index2+1]['code']" @tap="text_copy_event">
+                                                <text>{{detail.trace_source_data[item['id']][index2+1]['code']}}</text>
+                                                <text class="bg-white br-green cr-green round padding-horizontal-sm text-size-xs margin-left-sm">{{$t('common.copy')}}</text>
+                                            </view>
+                                        </uni-td>
+                                        <uni-td>
+                                            <block v-if="(detail.trace_source_data[item['id']][index2+1]['batch_number'] || null) != null">
+                                                <text>{{detail.trace_source_data[item['id']][index2+1]['batch_number']}}</text>
+                                            </block>
+                                        </uni-td>
+                                        <uni-td>
+                                            <block v-if="(detail.trace_source_data[item['id']][index2+1]['batch_number_expire'] || null) != null">
+                                                <text>{{detail.trace_source_data[item['id']][index2+1]['batch_number_expire']}}</text>
+                                            </block>
+                                        </uni-td>
+                                    </uni-tr>
+                                </block>
+                            </uni-table>
+                        </block>
+                    </view>
+                </view>
+
+                <!-- 扩展数据 -->
+                <view v-if="extension_data.length > 0" class="panel-item padding-main border-radius-main bg-white spacing-mb">
+                    <view class="br-b padding-bottom-main fw-b text-size">{{$t('user-order-detail.extended_data')}}</view>
+                    <view class="panel-content oh extension-list">
+                        <uni-table :emptyText="$t('common.no_data')">
+                            <block v-for="(item, index) in extension_data" :key="index">
+                                <uni-tr>
+                                    <uni-td>
+                                        <text>{{item.name}}</text>
+                                        <view v-if="(item.images || null) != null || (item.tips || null) != null" class="dis-inline-block" :data-value="item.url || ''" @tap="url_event">
+                                            <text>：</text>
+                                            <image v-if="(item.images || null) != null" :src="item.images" mode="aspectFit" class="img-tips radius br-f5 margin-right-xs va-m"></image>
+                                            <text v-if="(item.tips || null) != null" class="text-tips va-m">{{ item.tips }}</text>
+                                        </view>
+                                    </uni-td>
+                                </uni-tr>
+                            </block>
+                        </uni-table>
+                    </view>
+                </view>
+
+                <!-- 处方问诊 - 插件 -->
+                <block v-if="(detail.plugins_hospital_prescription_data || null) != null">
+                    <component-hospital-order-detail :propData="detail.plugins_hospital_prescription_data"></component-hospital-order-detail>
+                </block>
+            </view>
+
+            <!-- 结尾 -->
+            <component-bottom-line :propStatus="data_bottom_line_status"></component-bottom-line>
+        </block>
+        <block v-else>
+            <!-- 提示信息 -->
+            <component-no-data :propStatus="data_list_loding_status" :propMsg="data_list_loding_msg"></component-no-data>
+        </block>
+
+        <!-- 订单商品信息弹层 -->
+        <component-popup :propShow="popup_order_item_goods_info_status" propPosition="bottom" @onclose="popup_order_item_goods_info_close_event">
+            <view class="padding-main bg-white">
+                <view class="close oh pa top-0 right-0 z-i-deep">
+                    <view class="fr padding-top padding-right padding-left-sm padding-bottom-sm" @tap.stop="popup_order_item_goods_info_close_event">
+                        <iconfont name="icon-close-line" size="28rpx" color="#999"></iconfont>
+                    </view>
+                </view>
+                <view class="order-item-goods-info-container padding-top-xxl">
+                    <block v-if="(order_item_goods_info_data || null) != null">
+                        <view class="nav-base bg-white tc">
+                            <block v-for="(item, index) in order_item_goods_info_nav_list" :key="index">
+                                <view v-if="order_item_goods_info_nav_index == index" class="item fl cr-main nav-active-line" :data-index="index" @tap="order_item_goods_info_nav_event">{{ item }}</view>
+                                <view v-else class="item fl" :data-index="index" @tap="order_item_goods_info_nav_event">{{ item }}</view>
+                            </block>
+                        </view>
+                        <scroll-view :scroll-y="true" class="scroll-content margin-top-sm">
+                            <!-- 商品基础 -->
+                            <block v-if="order_item_goods_info_nav_index == 'base'">
+                                <view v-if="(order_item_goods_info_data.base_data || null) != null && order_item_goods_info_data.base_data.length > 0" class="panel-item">
+                                    <view class="panel-content oh">
+                                        <uni-table :emptyText="$t('common.no_data')">
+                                            <block v-for="(item, index) in order_item_goods_info_data.base_data" :key="index">
+                                                <uni-tr>
+                                                    <uni-th width="90">{{item.name}}</uni-th>
+                                                    <uni-td>{{item.value}}</uni-td>
+                                                </uni-tr>
+                                            </block>
+                                        </uni-table>
+                                    </view>
+                                </view>
+                                <block v-else>
+                                    <component-no-data propStatus="0"></component-no-data>
+                                </block>
+                            </block>
+                            <!-- 商品参数 -->
+                            <block v-else-if="order_item_goods_info_nav_index == 'params'">
+                                <view v-if="(order_item_goods_info_data.goods_params || null) != null && order_item_goods_info_data.goods_params.length > 0" class="panel-item">
+                                    <view class="panel-content oh">
+                                        <uni-table :emptyText="$t('common.no_data')">
+                                            <block v-for="(item, index) in order_item_goods_info_data.goods_params" :key="index">
+                                                <uni-tr>
+                                                    <uni-th width="90">{{item.name}}</uni-th>
+                                                    <uni-td>{{item.value}}</uni-td>
+                                                </uni-tr>
+                                            </block>
+                                        </uni-table>
+                                    </view>
+                                </view>
+                                <block v-else>
+                                    <component-no-data propStatus="0"></component-no-data>
+                                </block>
+                            </block>
+                            <!-- web端详情 -->
+                            <block v-else-if="order_item_goods_info_nav_index == 'detail-web'">
+                                <view v-if="(order_item_goods_info_data.goods_content_web || null) != null" class="web-html-content">
+                                    <mp-html :content="order_item_goods_info_data.goods_content_web" />
+                                </view>
+                                <block v-else>
+                                    <component-no-data propStatus="0"></component-no-data>
+                                </block>
+                            </block>
+                            <!-- 手机端详情 -->
+                            <block v-else-if="order_item_goods_info_nav_index == 'detail-app'">
+                                <view v-if="(order_item_goods_info_data.goods_content_app || null) != null && order_item_goods_info_data.goods_content_app.length > 0">
+                                    <view v-for="(item, index) in order_item_goods_info_data.goods_content_app" :key="index">
+                                        <image v-if="(item.images || null) != null" @tap="images_view_event" :data-value="item.images" class="wh-auto dis-block" :src="item.images" mode="widthFix"></image>
+                                        <view v-if="(item.content || null) != null" class="content-items">
+                                            <view v-for="(items, index2) in item.content" :key="index2">{{ items }}</view>
+                                        </view>
+                                    </view>
+                                </view>
+                                <block v-else>
+                                    <component-no-data propStatus="0"></component-no-data>
+                                </block>
+                            </block>
+                        </scroll-view>
+                    </block>
+                    <block v-else>
+                        <component-no-data propStatus="0"></component-no-data>
+                    </block>
+                </view>
+            </view>
+        </component-popup>
+
+        <!-- 朋友代付支付弹窗 -->
+        <component-friendpay-order-pay-popup
+            :propShow="is_show_friendpay_order_popup"
+            :propPluginsData="plugins_friendpay_data"
+            :propPayPrice="pay_price"
+            :propOrderIds="pay_value"
+            :propPaymentList="original_payment_list"
+            :propDefaultPaymentId="default_payment_id"
+            @close="friendpay_order_popup_close_event"
+            @self-pay="friendpay_self_pay_event"
+        ></component-friendpay-order-pay-popup>
+
+        <!-- 支付组件 -->
+        <component-payment
+            ref="payment"
+            :propCurrencySymbol="payment_currency_symbol"
+            :propPayUrl="pay_url"
+            :propQrcodeUrl="qrcode_url"
+            :propPaymentList="payment_list"
+            propPayDataKey="ids"
+            :propTempPayValue="pay_value"
+            :propPaymentId="payment_id"
+            :propDefaultPaymentId="default_payment_id"
+            :propPayPrice="pay_price"
+            :propIsShowPayment="is_show_payment_popup"
+            @close-payment-popup="payment_popup_event_close"
+            @pay-success="order_item_pay_back_handle"
+            @pay-fail="order_item_pay_back_handle"
+            @pay-html-close="order_item_pay_back_handle"
+        ></component-payment>
+
+        <!-- 公共 -->
+        <component-common ref="common"></component-common>
+    </view>
+</template>
+<script>
+    const app = getApp();
+    import componentCommon from '@/components/common/common';
+    import componentNoData from '@/components/no-data/no-data';
+    import componentBottomLine from '@/components/bottom-line/bottom-line';
+    import componentPopup from '@/components/popup/popup';
+    import componentPayment from '@/pages/common/components/payment/payment';
+    import componentHospitalOrderDetail from '@/pages/plugins/hospital/components/order-detail/order-detail';
+    import componentOrderOperateMore from '@/pages/user-order/components/order-operate-more/order-operate-more';
+    import componentFriendpayOrderPayPopup from '@/pages/plugins/friendpay/components/order-pay-popup/order-pay-popup';
+    import pluginLocale from './locale/index.js';
+    var common_static_url = app.globalData.get_static_url('common');
+    export default {
+        mixins: [pluginLocale],
+        data() {
+            return {
+                theme_view: app.globalData.get_theme_value_view(),
+                common_static_url: common_static_url,
+                params: null,
+                data_list_loding_status: 1,
+                data_list_loding_msg: '',
+                data_bottom_line_status: false,
+                detail: null,
+                detail_list: [],
+                extension_data: [],
+                site_fictitious: null,
+                status_tips: null,
+                goods_use_guide_data_active_index: 0,
+                extraction_take_index: 0,
+                // 商品服务插件
+                order_item_goods_info_data: null,
+                popup_order_item_goods_info_status: false,
+                order_item_goods_info_nav_index: 'base',
+                order_item_goods_info_nav_list: {
+                    'base': this.$t('common.base'),
+                    'params': this.$t('common.params'),
+                    'detail-web': this.$t('common.detail_text')+'('+this.$t('common.web_client')+')',
+                    'detail-app': this.$t('common.detail_text')+'('+this.$t('common.app_client')+')',
+                },
+                // 前往页面携带的参数
+                payment_currency_symbol: app.globalData.currency_symbol(),
+                pay_url: '',
+                qrcode_url: '',
+                payment_list: [],
+                pay_value: '',
+                pay_price: 0,
+                payment_id: 0,
+                default_payment_id: 0,
+                is_show_payment_popup: false,
+                // 智能工具箱（限定仅可选择下单支付方式）
+                is_order_pay_only_can_buy_payment: 0,
+                // 订单是否展示商品快照（与站点配置 common_is_order_show_goods_snapshot 一致）
+                common_is_order_show_goods_snapshot: 0,
+                original_payment_list: [],
+                plugins_friendpay_data: null,
+                is_show_friendpay_order_popup: false,
+            };
+        },
+
+        components: {
+            componentCommon,
+            componentNoData,
+            componentBottomLine,
+            componentPopup,
+            componentPayment,
+            componentHospitalOrderDetail,
+            componentOrderOperateMore,
+            componentFriendpayOrderPayPopup,
+        },
+
+        computed: {
+            // 订单状态进度数据
+            status_progress() {
+                return (this.detail || {}).status_progress || null;
+            },
+            // 状态进度标题
+            status_progress_name() {
+                const sp = this.status_progress || {};
+                return sp.status_name || sp.current_name || ((this.detail || {}).status_name) || '';
+            },
+            // 状态进度提示文案（兼容旧 status_tips）
+            status_progress_tips() {
+                const tips = String(((this.status_progress || {}).tips) || '');
+                if (tips) {
+                    return tips;
+                }
+                return (this.status_tips || null) != null ? String(this.status_tips) : '';
+            },
+            // 状态进度样式
+            status_progress_style() {
+                if (this.status_progress != null && (this.status_progress.style || null) != null) {
+                    return String(this.status_progress.style || 'default');
+                }
+                // 无进度数据时按订单状态回退
+                const status = Number(((this.detail || {}).status) || 0);
+                if (status == 5 || status == 6) {
+                    return 'danger';
+                }
+                if (status == 4) {
+                    return 'success';
+                }
+                if (status == 3) {
+                    return 'primary';
+                }
+                if (status == 2) {
+                    return 'warning';
+                }
+                return 'default';
+            },
+            // 状态进度步骤列表
+            status_progress_steps() {
+                const steps = ((this.status_progress || {}).steps) || null;
+                return (steps != null && steps.length > 0) ? steps : [];
+            },
+        },
+
+        onLoad(params) {
+            // 参数处理
+            params = app.globalData.launch_params_handle(params);
+
+            // 调用公共事件方法
+            app.globalData.page_event_onload_handle(params);
+
+            // 设置参数
+            this.setData({
+                params: params,
+            });
+
+            // 初始化配置
+            this.init_config();
+
+            // 数据加载
+            this.init();
+        },
+
+        onShow() {
+            // 调用公共事件方法
+            app.globalData.page_event_onshow_handle();
+
+            // 公共onshow事件（$refs 未就绪时自动延后重试）
+            app.globalData.page_common_on_show(this);
+
+            // 分享菜单处理
+            app.globalData.page_share_handle();
+        },
+
+        // 下拉刷新
+        onPullDownRefresh() {
+            this.init();
+        },
+
+        methods: {
+            // 进度步骤样式类
+            make_step_class(index) {
+                if (this.make_step_done(index)) {
+                    return 'is-done';
+                }
+                if (this.make_step_active(index)) {
+                    return 'is-active';
+                }
+                return '';
+            },
+            // 步骤是否已完成
+            make_step_done(index) {
+                const cur = Number(((this.status_progress || {}).current));
+                if (isNaN(cur) || cur < 0) {
+                    return false;
+                }
+                return index < cur;
+            },
+            // 步骤是否进行中
+            make_step_active(index) {
+                const cur = Number(((this.status_progress || {}).current));
+                if (isNaN(cur) || cur < 0) {
+                    return false;
+                }
+                return index === cur;
+            },
+
+            // 初始化配置
+            init_config(status) {
+                if ((status || false) == true) {
+                    this.setData({
+                        is_order_pay_only_can_buy_payment: parseInt(app.globalData.get_config('plugins_base.intellectstools.data.is_order_pay_only_can_buy_payment', 0)),
+                        common_is_order_show_goods_snapshot: parseInt(app.globalData.get_config('config.common_is_order_show_goods_snapshot', 0)),
+                    });
+                } else {
+                    app.globalData.is_config(this, 'init_config');
+                }
+            },
+
+            // 初始化
+            init() {
+                this.setData({
+                    data_list_loding_status: 1,
+                });
+                uni.request({
+                    url: app.globalData.get_request_url('detail', 'order'),
+                    method: 'POST',
+                    data: this.params,
+                    dataType: 'json',
+                    success: (res) => {
+                        uni.stopPullDownRefresh();
+                        if (res.data.code == 0) {
+                            var data = res.data.data;
+                            var detail = data.data || null;
+                            this.setData({
+                                detail: data.data,
+                                extraction_take_index: 0,
+                                detail_list: [
+                                    { name: this.$t('common.user_order_detail_order_number'), value: data.data.order_no || '', is_copy: 1 },
+                                    { name: this.$t('user-order-detail.shipping_services'), value: data.data.warehouse_name || '' },
+                                    { name: this.$t('user-order-detail.order_mode'), value: data.data.order_model_name || '' },
+                                    { name: this.$t('common.order_status'), value: data.data.status_name || '' },
+                                    { name: this.$t('common.payment_status'), value: data.data.pay_status_name || '' },
+                                    { name: this.$t('user-order-detail.order_unit_price'), value: data.data.price || '' },
+                                    { name: this.$t('common.total_order_price'), value: data.data.total_price || '' },
+                                    { name: this.$t('user-order-detail.discount_amount'), value: data.data.preferential_price || '' },
+                                    { name: this.$t('user-order-detail.increase_amount'), value: data.data.increase_price || '' },
+                                    { name: this.$t('common.payment_amount'), value: data.data.pay_price || '' },
+                                    { name: this.$t('common.payment_method'), value: (data.data.payment_name || '') + ((data.data.is_under_line_text || null) == null || (data.data.payment_name || null) == null ? '' : '（' + data.data.is_under_line_text + '）') },
+                                    { name: this.$t('user-order-detail.guest_book'), value: data.data.user_note || '' },
+                                    { name: this.$t('common.creation_time'), value: data.data.add_time || '' },
+                                    { name: this.$t('common.confirmation_time'), value: data.data.confirm_time || '' },
+                                    { name: this.$t('common.payment_time'), value: data.data.pay_time || '' },
+                                    { name: this.$t('user-order-detail.delivery_time'), value: data.data.delivery_time || '' },
+                                    { name: this.$t('user-order-detail.receiving_time'), value: data.data.collect_time || '' },
+                                    { name: this.$t('common.cancel_time'), value: data.data.cancel_time || '' },
+                                    { name: this.$t('user-order-detail.closing_time'), value: data.data.close_time || '' },
+                                ],
+                                extension_data: data.data.extension_data || [],
+                                site_fictitious: data.site_fictitious || null,
+                                status_tips: data.status_tips || null,
+                                data_list_loding_status: 3,
+                                data_bottom_line_status: true,
+                                data_list_loding_msg: '',
+                                // 支付信息
+                                original_payment_list: data.payment_list || [],
+                                payment_list: data.payment_list || [],
+                                default_payment_id: parseInt(data.default_payment_id || 0),
+                                plugins_friendpay_data: data.plugins_friendpay_data || null,
+                                payment_id: (detail == null) ? 0 : detail.payment_id,
+                                pay_url: app.globalData.get_request_url('pay', 'order'),
+                                qrcode_url: app.globalData.get_request_url('paycheck', 'order'),
+                                payment_currency_symbol: (detail == null ? '' : detail.currency_data.currency_symbol) || this.payment_currency_symbol,
+                                pay_value: (detail == null) ? '' : detail.id,
+                                pay_price: (detail == null) ? '0.00' : detail.total_price,
+                            });
+                        } else {
+                            this.setData({
+                                data_list_loding_status: 2,
+                                data_bottom_line_status: false,
+                                data_list_loding_msg: res.data.msg,
+                            });
+                            if (app.globalData.is_login_check(res.data, this, 'init')) {
+                                app.globalData.showToast(res.data.msg);
+                            }
+                        }
+                    },
+                    fail: () => {
+                        uni.stopPullDownRefresh();
+                        self.setData({
+                            data_list_loding_status: 2,
+                            data_bottom_line_status: false,
+                            data_list_loding_msg: this.$t('common.internet_error_tips'),
+                        });
+                        app.globalData.showToast(this.$t('common.internet_error_tips'));
+                    },
+                });
+            },
+
+            // 售后订单事件
+            orderaftersale_event(e) {
+                var oid = e.currentTarget.dataset.oid || 0;
+                var did = e.currentTarget.dataset.did || 0;
+                if (oid == 0 || did == 0) {
+                    app.globalData.showToast(this.$t('common.parameter_error'));
+                    return false;
+                }
+
+                // 进入售后页面
+                app.globalData.url_open('/pages/user-orderaftersale-detail/user-orderaftersale-detail?oid=' + oid + '&did=' + did);
+            },
+
+            // 地图查看
+            address_map_event(e) {
+                if ((this.detail.address_data || null) == null) {
+                    app.globalData.showToast(this.$t('common.incorrect_address'));
+                    return false;
+                }
+
+                // 打开地图
+                var data = this.detail.address_data;
+                var name = data.alias || data.name || '';
+                var address = (data.province_name || '') + (data.city_name || '') + (data.county_name || '') + (data.address || '');
+                app.globalData.open_location(data.lng, data.lat, name, address);
+            },
+
+            // 订单商品信息弹层开启弹层
+            popup_order_item_goods_info_event(e) {
+                this.setData({
+                    order_item_goods_info_data: this.detail.items[e.currentTarget.dataset.index] || null,
+                    popup_order_item_goods_info_status: true,
+                });
+            },
+
+            // 订单商品信息弹层弹层关闭
+            popup_order_item_goods_info_close_event(e) {
+                this.setData({
+                    popup_order_item_goods_info_status: false,
+                });
+            },
+
+            // 订单商品信息弹层弹层导航事件
+            order_item_goods_info_nav_event(e) {
+                this.setData({
+                    order_item_goods_info_nav_index: e.currentTarget.dataset.index || 'base'
+                });
+            },
+
+            // 订单商品使用指南切换事件
+            goods_use_guide_data_switch_event(e) {
+                this.setData({
+                    goods_use_guide_data_active_index: e.currentTarget.dataset.index
+                });
+            },
+
+            // 支付
+            pay_event(e) {            
+                // 智能工具箱（限定仅可选择下单支付方式）
+                if(this.is_order_pay_only_can_buy_payment == 1) {
+                    var payment_list = [];
+                    this.original_payment_list.forEach(function(v, k) {
+                        if(v.id == this.payment_id) {
+                            payment_list.push(v);
+                        }
+                    });
+                } else {
+                    var payment_list = this.original_payment_list;
+                }
+
+                // 设置支付参数
+                var show_friendpay = (this.plugins_friendpay_data || null) != null && this.plugins_friendpay_data.is_enable == 1;
+                this.setData({
+                    payment_list: payment_list,
+                    is_show_friendpay_order_popup: show_friendpay,
+                    is_show_payment_popup: !show_friendpay,
+                });
+            },
+
+            // 朋友代付弹窗关闭
+            friendpay_order_popup_close_event() {
+                this.setData({ is_show_friendpay_order_popup: false });
+            },
+
+            // 朋友代付-自己支付（已在代付弹窗选好支付方式，直接发起支付，不再二次打开支付弹窗）
+            friendpay_self_pay_event(e) {
+                var payment_list = e.payment_list || this.original_payment_list;
+                var payment_id = e.payment_id || this.default_payment_id;
+                var order_ids = e.order_ids || this.pay_value;
+                this.setData({
+                    is_show_friendpay_order_popup: false,
+                    is_show_payment_popup: false,
+                    payment_list: payment_list,
+                    payment_id: payment_id,
+                });
+                if ((this.$refs.payment || null) != null && (order_ids || null) != null && payment_id > 0) {
+                    this.$refs.payment.pay_handle(order_ids, payment_id, payment_list);
+                }
+            },
+
+            // 支付弹窗关闭
+            payment_popup_event_close(e) {
+                this.setData({
+                    is_show_payment_popup: false,
+                });
+            },
+
+            // 订单成功和失败回调
+            order_item_pay_back_handle(data) {
+                this.init();
+            },
+
+            // 取消
+            cancel_event(e) {
+                uni.showModal({
+                    title: this.$t('common.warm_tips'),
+                    content: this.$t('common.cancel_confirm_tips'),
+                    confirmText: this.$t('common.confirm'),
+                    cancelText: this.$t('common.no'),
+                    success: (result) => {
+                        if (result.confirm) {
+                            uni.showLoading({
+                                title: this.$t('common.processing_in_text'),
+                            });
+                            uni.request({
+                                url: app.globalData.get_request_url('cancel', 'order'),
+                                method: 'POST',
+                                data: {
+                                    id: this.detail.id,
+                                },
+                                dataType: 'json',
+                                success: (res) => {
+                                    uni.hideLoading();
+                                    if (res.data.code == 0) {
+                                        this.init();
+                                        app.globalData.showToast(res.data.msg, 'success');
+                                    } else {
+                                        app.globalData.showToast(res.data.msg);
+                                    }
+                                },
+                                fail: () => {
+                                    uni.hideLoading();
+                                    app.globalData.showToast(this.$t('common.internet_error_tips'));
+                                },
+                            });
+                        }
+                    },
+                });
+            },
+
+            // 收货
+            collect_event(e) {
+                var transactionid = this.detail.weixin_collect_data || null;
+                if(transactionid == null || !uni.openBusinessView) {
+                    this.collect_hand_handle(e);
+                } else {
+                    // 存在微信单号收货数据，则拉起微信确认收货组件、失败则调用手动收货模式
+                    var self = this;
+                    uni.openBusinessView({
+                        businessType: 'weappOrderConfirm',
+                        extraData: {
+                            transaction_id: transactionid
+                        },
+                        success(res) {
+                            self.collect_handle(e);
+                        },
+                        fail(res) {
+                            if((res.status || null) == 'fail') {
+                                self.collect_hand_handle(e);
+                            }
+                        }
+                    });
+                }
+            },
+
+            // 手动收货
+            collect_hand_handle(e) {
+                uni.showModal({
+                    title: this.$t('common.warm_tips'),
+                    content: this.$t('common.confirm_goods_been_received_completed_cannot'),
+                    confirmText: this.$t('common.confirm'),
+                    cancelText: this.$t('common.no'),
+                    success: (result) => {
+                        if (result.confirm) {
+                            this.collect_handle(e);
+                        }
+                    },
+                });
+            },
+
+            // 收货处理
+            collect_handle(e) {
+                uni.showLoading({
+                    title: this.$t('common.processing_in_text'),
+                });
+                uni.request({
+                    url: app.globalData.get_request_url('collect', 'order'),
+                    method: 'POST',
+                    data: {
+                        id: this.detail.id,
+                    },
+                    dataType: 'json',
+                    success: (res) => {
+                        uni.hideLoading();
+                        if (res.data.code == 0) {
+                            this.init();
+                            app.globalData.showToast(res.data.msg, 'success');
+                        } else {
+                            app.globalData.showToast(res.data.msg);
+                        }
+                    },
+                    fail: () => {
+                        uni.hideLoading();
+                        app.globalData.showToast(this.$t('common.internet_error_tips'));
+                    },
+                });
+            },
+
+            // 删除
+            delete_event(e) {
+                uni.showModal({
+                    title: this.$t('common.warm_tips'),
+                    content: this.$t('common.delete_confirm_tips'),
+                    confirmText: this.$t('common.confirm'),
+                    cancelText: this.$t('common.no'),
+                    success: (result) => {
+                        if (result.confirm) {
+                            uni.showLoading({
+                                title: this.$t('common.processing_in_text'),
+                            });
+                            uni.request({
+                                url: app.globalData.get_request_url('delete', 'order'),
+                                method: 'POST',
+                                data: {
+                                    id: this.detail.id,
+                                },
+                                dataType: 'json',
+                                success: (res) => {
+                                    uni.hideLoading();
+                                    if (res.data.code == 0) {
+                                        app.globalData.showToast(res.data.msg, 'success');
+                                        this.setData({
+                                            detail: null,
+                                            data_list_loding_status: 0,
+                                        });
+                                    } else {
+                                        app.globalData.showToast(res.data.msg);
+                                    }
+                                },
+                                fail: () => {
+                                    uni.hideLoading();
+                                    app.globalData.showToast(this.$t('common.internet_error_tips'));
+                                },
+                            });
+                        }
+                    },
+                });
+            },
+
+            // 图片查看
+            images_view_event(e) {
+                var value = e.currentTarget.dataset.value || null;
+                if (value != null) {
+                    uni.previewImage({
+                        current: value,
+                        urls: [value],
+                    });
+                }
+            },
+
+            // url事件
+            url_event(e) {
+                app.globalData.url_event(e);
+            },
+
+            // 订单操作组件事件
+            order_operate_cancel_event(data) {
+                this.cancel_event();
+            },
+            order_operate_pay_event(data) {
+                this.pay_event();
+            },
+            order_operate_collect_event(data) {
+                this.collect_event();
+            },
+            order_operate_delete_event(data) {
+                this.delete_event();
+            },
+
+            // 文本复制
+            text_copy_event(e) {
+                if((e.currentTarget.dataset.value || null) != null) {
+                    app.globalData.text_copy_event(e);
+                }
+            },
+
+            // 取货码上一页
+            extraction_take_prev_event() {
+                var list = (((this.detail || null) == null) ? null : this.detail.extraction_data) || null;
+                var items = ((list || null) == null) ? [] : (list.items || []);
+                if (items.length <= 1) {
+                    return;
+                }
+                var index = this.extraction_take_index || 0;
+                this.setData({
+                    extraction_take_index: index <= 0 ? items.length - 1 : index - 1,
+                });
+            },
+
+            // 取货码下一页
+            extraction_take_next_event() {
+                var list = (((this.detail || null) == null) ? null : this.detail.extraction_data) || null;
+                var items = ((list || null) == null) ? [] : (list.items || []);
+                if (items.length <= 1) {
+                    return;
+                }
+                var index = this.extraction_take_index || 0;
+                this.setData({
+                    extraction_take_index: index >= items.length - 1 ? 0 : index + 1,
+                });
+            }
+        },
+    };
+</script>
+<style>
+    @import './user-order-detail.css';
+</style>

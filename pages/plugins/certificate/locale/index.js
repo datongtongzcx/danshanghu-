@@ -1,0 +1,41 @@
+import { createPageLocaleMixin } from '@/locale/merge-page-locale.js';
+var zh = {
+    "pages": {
+        "plugins-certificate-userauth": "资质认证",
+        "plugins-certificate-userauth-saveinfo": "资质认证编辑",
+        "plugins-certificate-userauth-detail": "资质认证详情"
+    },
+    "certificate-userauth": {
+        "go_authenticate": "去认证",
+        "certificate_name": "证件名称",
+        "id": "证件号码",
+        "expiration_date": "过期时间"
+    }
+};
+var en = {
+    "pages": {
+        "plugins-certificate-userauth": "Certificate",
+        "plugins-certificate-userauth-saveinfo": "Certificate editor",
+        "plugins-certificate-userauth-detail": "Certificate detail"
+    },
+    "certificate-userauth": {
+        "go_authenticate": "Go authenticate",
+        "certificate_name": "Certificate Name",
+        "id": "ID NO",
+        "expiration_date": "Expiration date"
+    }
+};
+var spa = {
+    "pages": {
+        "plugins-certificate-userauth": "Certificado",
+        "plugins-certificate-userauth-saveinfo": "Editar certificado",
+        "plugins-certificate-userauth-detail": "Detalle del certificado"
+    },
+    "certificate-userauth": {
+        "go_authenticate": "Autenticar",
+        "certificate_name": "Nombre del certificado",
+        "id": "N.º de ID",
+        "expiration_date": "Fecha de vencimiento"
+    }
+};
+export default createPageLocaleMixin({ zh, en, spa });

@@ -1,0 +1,45 @@
+name: 发布微信小程序
+
+# 推送 v* 标签（如 v1.0.1）或在 Actions 页面手动触发
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  upload:
+    name: 编译并上传体验版
+    runs-on: ubuntu-latest
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      # vue2 版 uni-app 构建链需固定 Node 18
+      - name: 安装 Node 18
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: 安装依赖
+        run: npm ci
+
+      - name: 静态校验
+        run: npm run verify
+
+      - name: 编译微信小程序
+        run: npm run build:mp-weixin
+        env:
+          UNI_CLI_CONTEXT: '.'
+
+      # 需要预先在仓库 Settings -> Secrets -> Actions 配置：
+      #   WX_UPLOAD_PRIVATE_KEY：微信公众平台「开发设置-小程序代码上传」下载的密钥内容
+      #   WX_UPLOAD_ROBOT（可选）：机器人编号 1-30
+      # 同时需在小程序后台将 GitHub Actions 出口 IP 加入上传密钥 IP 白名单（或关闭校验）
+      - name: 上传体验版
+        run: npm run upload:mp-weixin
+        env:
+          WX_UPLOAD_PRIVATE_KEY: ${{ secrets.WX_UPLOAD_PRIVATE_KEY }}
+          WX_UPLOAD_ROBOT: ${{ secrets.WX_UPLOAD_ROBOT }}
+          WX_UPLOAD_VERSION: ${{ github.ref_name }}

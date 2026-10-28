@@ -1,0 +1,170 @@
+<template>
+    <view :class="theme_view">
+        <!-- 主体内容 -->
+        <block v-if="data_list_loding_status == 3">
+            <view class="password">
+                <view class="padding-main">
+                    <form @submit="form_bind_pwd">
+                        <view class="margin-top-xxxl">
+                            <view v-if="(user.is_setup_pwd || 0) == 1" class="pr">
+                                <input type="text" :placeholder="$t('password.enter_current_password')" minlength="6" maxlength="18" name="my_pwd" :password="!eyes1" class="form-item margin-bottom-main" />
+                                <view class="eyes pa" data-index="1" @tap="eyes_event"><iconfont :name="eyes1 ? 'icon-eye-close' : 'icon-eye-half'" color="#666" size="32rpx"></iconfont></view>
+                            </view>
+                            <view class="pr">
+                                <input type="text" :placeholder="$t('password.enter_new_password')" minlength="6" maxlength="18" name="new_pwd" :password="!eyes2" class="form-item margin-bottom-main" />
+                                <view class="eyes pa" data-index="2" @tap="eyes_event"><iconfont :name="eyes2 ? 'icon-eye-close' : 'icon-eye-half'" color="#666" size="32rpx"></iconfont></view>
+                            </view>
+                            <view class="pr">
+                                <input type="text" :placeholder="$t('password.confirm_new_password')" minlength="6" maxlength="18" name="confirm_new_pwd" :password="!eyes3" class="form-item margin-bottom-main" />
+                                <view class="eyes pa" data-index="3" @tap="eyes_event"><iconfont :name="eyes3 ? 'icon-eye-close' : 'icon-eye-half'" color="#666" size="32rpx"></iconfont></view>
+                            </view>
+                        </view>
+                        <view class="margin-top-xxxxl tc">
+                            <button class="bg-main br-main cr-white round text-size" form-type="submit" type="default" hover-class="none" :loading="form_submit_loading" :disabled="form_submit_loading">{{$t('password.confirm_modifications')}}</button>
+                        </view>
+                    </form>
+                </view>
+            </view>
+        </block>
+        <block v-else>
+            <!-- 错误提示 -->
+            <component-no-data :propStatus="data_list_loding_status" :propMsg="data_list_loding_msg"></component-no-data>
+        </block>
+
+        <!-- 公共 -->
+        <component-common ref="common"></component-common>
+    </view>
+</template>
+<script>
+    const app = getApp();
+    import componentCommon from '@/components/common/common';
+    import componentNoData from '@/components/no-data/no-data';
+    import pluginLocale from './locale/index.js';
+    export default {
+        mixins: [pluginLocale],
+        data() {
+            return {
+                theme_view: app.globalData.get_theme_value_view(),
+                data_list_loding_status: 1,
+                data_list_loding_msg: '',
+                form_submit_loading: false,
+                user: {},
+                // 是否显示密码
+                eyes1: false,
+                eyes2: false,
+                eyes3: false,
+            };
+        },
+        components: {
+            componentCommon,
+            componentNoData
+        },
+        onLoad(params) {
+            // 参数处理
+            params = app.globalData.launch_params_handle(params);
+
+            // 调用公共事件方法
+            app.globalData.page_event_onload_handle(params);
+        },
+
+        onShow() {
+            // 调用公共事件方法
+            app.globalData.page_event_onshow_handle();
+
+            // 数据加载
+            this.init();
+
+            // 公共onshow事件（$refs 未就绪时自动延后重试）
+            app.globalData.page_common_on_show(this);
+        },
+        methods: {
+            init() {
+                var user = app.globalData.get_user_info(this, 'init');
+                if (user != false) {
+                    this.setData({
+                        data_list_loding_status: 3,
+                        user: user,
+                    });
+                } else {
+                    this.setData({
+                        data_list_loding_status: 0,
+                        data_list_loding_msg: this.$t('common.please_login_first'),
+                    });
+                }
+            },
+            eyes_event(e) {
+                if (e.currentTarget.dataset.index == '1') {
+                    this.setData({
+                        eyes1: !this.eyes1,
+                    });
+                } else if (e.currentTarget.dataset.index == '2') {
+                    this.setData({
+                        eyes2: !this.eyes2,
+                    });
+                } else {
+                    this.setData({
+                        eyes3: !this.eyes3,
+                    });
+                }
+            },
+
+            // 绑定表单
+            form_bind_pwd(e) {
+                // 数据验证
+                var validation = [];
+                if((this.user.is_setup_pwd || 0) == 1) {
+                    validation.push({ fields: 'my_pwd', msg: this.$t('common.enter_password') });
+                }
+                validation.push({ fields: 'new_pwd', msg: this.$t('password.enter_new_password') });
+                validation.push({ fields: 'confirm_new_pwd', msg: this.$t('password.confirm_new_password_2') });
+                if (app.globalData.fields_check(e.detail.value, validation)) {
+                    uni.showLoading({
+                        title: this.$t('common.processing_in_text'),
+                    });
+                    this.setData({
+                        form_submit_loading: true,
+                    });
+
+                    // 网络请求
+                    uni.request({
+                        url: app.globalData.get_request_url('loginpwdupdate', 'safety'),
+                        method: 'POST',
+                        data: e.detail.value,
+                        dataType: 'json',
+                        success: (res) => {
+                            uni.hideLoading();
+                            this.setData({
+                                form_submit_loading: false,
+                            });
+                            if (res.data.code == 0) {
+                                app.globalData.showToast(res.data.msg, 'success');
+                                if((res.data.data || null) != null) {
+                                    this.setData({
+                                        user: res.data.data
+                                    });
+                                    uni.setStorageSync(app.globalData.data.cache_user_info_key, res.data.data);
+                                }
+                                setTimeout(() => {
+                                    // 默认返回上一页
+                                    uni.navigateBack();
+                                }, 1500);
+                            } else {
+                                app.globalData.showToast(res.data.msg);
+                            }
+                        },
+                        fail: () => {
+                            uni.hideLoading();
+                            this.setData({
+                                form_submit_loading: false,
+                            });
+                            app.globalData.showToast(this.$t('common.internet_error_tips'));
+                        },
+                    });
+                }
+            },
+        },
+    };
+</script>
+<style>
+    @import './password.css';
+</style>
