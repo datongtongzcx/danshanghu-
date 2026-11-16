@@ -411,5 +411,5 @@
     };
 </script>
 <style>
-    @import './cash-create';
+    @import './cash-create.css';
 </style>

@@ -7,7 +7,12 @@ unpackage/
 .env
 .env.*
 *.log
+*.err
 npm-debug.log*
+
+# 微信开发者工具自动生成的本地配置
+project.config.json
+project.private.config.json
 
 # 编辑器 / 系统
 .idea/
